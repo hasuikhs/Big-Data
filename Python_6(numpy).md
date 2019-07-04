@@ -169,6 +169,7 @@ import numpy as np
   ```
 
   ![1562143247360](C:\Users\student\AppData\Roaming\Typora\typora-user-images\1562143247360.png)
+  선형 그래프 그림
 
 - ```python
   import numpy as np
@@ -187,6 +188,7 @@ import numpy as np
   ```
 
   ![1562143353698](C:\Users\student\AppData\Roaming\Typora\typora-user-images\1562143353698.png)
+  정규분포 그래프 그림
 
 - ```python
   import numpy as np
@@ -200,6 +202,7 @@ import numpy as np
   ```
 
   ![1562143392681](C:\Users\student\AppData\Roaming\Typora\typora-user-images\1562143392681.png)
+  균등분포 그래프 그림
 
 - ```python
   import numpy as np
@@ -214,6 +217,7 @@ import numpy as np
   ```
 
   ![1562143429545](C:\Users\student\AppData\Roaming\Typora\typora-user-images\1562143429545.png)
+  표준정규분포 그림
 
 - ```python
   import numpy as np
@@ -226,6 +230,7 @@ import numpy as np
   ```
 
   ![1562143463610](C:\Users\student\AppData\Roaming\Typora\typora-user-images\1562143463610.png)
+  
 
 - ```python
   import numpy as np
