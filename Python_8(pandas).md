@@ -126,3 +126,75 @@ df2 = pd.DataFrame(data2, index=[1, 2, 4, 5])
 pd.merge(df1, df2, left_index = True, right_index = True, how = "inner")
 ```
 
+```python
+## pandas에서 필요한 데이터 파일을 다운로드
+## google -> lending club data 
+## 2015년 Loand Data 다운로드 후 적절한 위치에 저장
+import numpy as np
+import pandas as pd
+```
+
+```python
+## 1. Data Loading
+df = pd.read_csv("./data/LoanData/LoanStats3d.csv",
+                 sep = ",",
+                 skiprows = 1)
+                 
+## 총 데이터의 수 확인(몇 줄의 대출정보가 있는지 확인)
+display(df.shape)
+```
+
+```python
+## 필요한 column만 추출해서 새로운 DataFrame 생성
+## loan_amnt : 대출 금액
+## loan_status : 대출 상태
+## grade : 대출 등급
+## int_rate : 이자율
+## term : 대출기간
+df2 = df[["loan_amnt", "loan_status", "grade", "int_rate", "term"]]
+df2.head()
+```
+
+```python
+## 각 컬럼의 값 확인
+display(df2["loan_status"].unique())
+display(df2["grade"].unique())
+display(df2["term"].unique())
+
+## 결측값 제거
+display(df2.shape)
+df2.dropna(how = "any", inplace = True)
+display(df2)
+```
+
+```python
+## 대출기간별 대출 총액 구하기
+print("대출기간 36 개월 대출 총액 : {:,}".format(df2.loc[df2["term"] == " 36 months", "loan_amnt"].sum()))
+print("대출기간 60 개월 대출 총액 : {:,}".format(df2.loc[df2["term"] == " 60 months", "loan_amnt"].sum()))
+
+terms = df2["term"].unique()
+term_result = {}
+
+for t in terms:
+    term_sum = df2.loc[df2["term"] == t, "loan_amnt"].sum()
+    term_result[t] = term_sum
+    
+for key in term_result:
+    print("{}".format(key), end = " : ")
+    print("{}".format("{:,}".format(term_result[key])))
+```
+
+```python
+## 대출 중 불량한 상태의 대출에 대해서
+## 불량한 상태의 대출( Charged Off, Late (31-120 days), Late (16-30 days), In Grace Period )
+## 각 Grade의 대출 건수를 구하라
+
+bad_loan_status = df2["loan_status"].unique()[[1, 3, 4, 5]]
+
+# 불량 대출에 대한 mask 생성
+bad_mask = df2["loan_status"].isin(bad_loan_status)
+print(bad_mask.sum())
+
+df3 = df2.loc[bad_mask, "grade"]
+df3.value_counts().sort_index()  
+```
