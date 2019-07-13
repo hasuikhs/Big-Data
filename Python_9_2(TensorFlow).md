@@ -78,6 +78,7 @@ W = tf.Variable(tf.random_normal([2, 1]), name = "weight")
 b = tf.Variable(tf.random_normal([1]), name = "bias")
 
 # Hypothesis
+# sigmoid : y data가 n행 1열 짜리 로지스틱 회귀에 사용
 logits = tf.matmul(X, W) + b
 H = tf.sigmoid(logits)
 
@@ -298,6 +299,7 @@ W = tf.Variable(tf.random_normal([4, 3]), name = "weight")
 b = tf.Variable(tf.random_normal([3]), name = "bias")
 
 # Hypothesis
+# softmax : y data가 명시적 분류에 의해 행렬로 구성될때 사용되는 로지스틱 회귀에 
 logits = tf.matmul(X, W) + b
 H = tf.nn.softmax(logits)
 
