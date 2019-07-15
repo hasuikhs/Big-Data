@@ -54,6 +54,15 @@ print(sess.run(H, feed_dict = {x : [6]}))
 
 ------
 
+```
+        - Softmax Regression(= Multinomial Classification)은 
+
+          Logistic Regression(= Binary Classification) 을 여러번 적용해 구할 수 있다.
+
+        - sigmoid : 1~100 사이 값을 0~1사이 값으로 변경해줌.
+
+        - softmax : 2.0, 1.0, 0.5 등의 값을 합이 1이 되도록 백분율로 계산해줌.
+```
 ```python
 import tensorflow as tf
 
