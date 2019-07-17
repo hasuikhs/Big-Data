@@ -402,4 +402,17 @@ correct = tf.equal(predict, tf.argmax(Y, 1))
 accuracy = tf.reduce_mean(tf.cast(correct, dtype = tf.float32))
 print("Accuracy : {}".format(sess.run(accuracy, feed_dict = {X : nx_data, Y : y_data})))
 ```
-
+```python
+# 결과값 
+step 0 : 1.3224927186965942
+step 60000 : 0.12513722479343414
+step 120000 : 0.0993676409125328
+step 180000 : 0.08738666772842407
+step 240000 : 0.08002590388059616
+step 300000 : 0.07490383088588715
+step 360000 : 0.07105227559804916
+step 420000 : 0.06803003698587418
+step 480000 : 0.06556453555822372
+step 540000 : 0.06349492818117142
+Accuracy : 0.9821000099182129
+```
