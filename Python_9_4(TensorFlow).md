@@ -333,5 +333,40 @@ print("정확도 : {}".format(result))
   ### SUM => [1.66, 1.43, 2.4, 1.3, 1.2, ...]
   ### 최종 prediction은 SUM한 결과값을 가지고 예측
   ```
+  ```python
+  ## 앙상블을 사용하기 위해서는 클래스를 이용해 각각의 개체를 만들어 생성해야 함
+  ## Class
+  ## 1. 객체 모델링의 수단
+  ## 2. ADT(abstract data type) - 추상적 데이터 타입
+
+  ## class안에 정의되는 내용은 크게 3가지
+  ## 상태값(field, member variable, property)
+  ## 수행하는 작업을 위한 함수(method, member function, method function)
+  ## 정의된 class정보를 바탕으로 일정 메모리를 확보
+  ## => 이런 확보된 메모리 공간 -> 인스턴스, 객체
+  ## 이런 객체를 생성하기 위해 생성자가 호출되어야 함
+
+  ## 학생이 3명 존재
+  ## 각 학생이 가지는 정보는 국어, 영어, 수학 점수
+  ## 평균 ,총점 결과를 알고 싶다면
+
+  class Student:
+    
+    # constructor
+    def __init__(self, s_name, s_kor, s_eng, s_math):
+        # property를 생성하려면 self를 이용
+        self.student_name = s_name
+        self.kor = s_kor
+        self.eng = s_eng
+        self.math = s_math
+        
+    # method
+    def get_total(self):
+        self.total = self.kor + self.eng + self.math
+        return self.total
+
+  stu1 = Student("홍길동", 10 , 20, 30)
+  print(stu1.get_total())  
+  ```
 
   
