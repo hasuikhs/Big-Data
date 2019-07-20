@@ -647,5 +647,10 @@ for i in range(len(result)):
     
 submission = pd.DataFrame(data={"PassengerId" : pid_df, "Survived" : label})
 submission.to_csv("./data/titanic/subimission.csv")
+
+# kaggle 업로드 결과
+## 1. sex, age, pclass 열 추출 후 age에 관해서 dropna 하고 러닝 후 업로드 결과 : 0.60765
+## 2. 추출된 열에서 dropna 후 sex, pclass만으로 러닝 후 업로드 결과 : 0.75598
+## 3. sex, pclass, sibsp, parch 에 관해서 러닝 후 업로드 결과 : 0.77033
 ```
 
