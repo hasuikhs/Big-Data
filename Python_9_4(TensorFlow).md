@@ -368,5 +368,156 @@ print("정확도 : {}".format(result))
   stu1 = Student("홍길동", 10 , 20, 30)
   print(stu1.get_total())  
   ```
+  ```python
+  import tensorflow as tf
+  import pandas as pd
+  import datetime
+  import numpy as np
+  import math
+  from sklearn.preprocessing import MinMaxScaler
+
+  ## 1. Data Loading
+  df_tr = pd.read_csv("./data/digit/train.csv", sep = ",")
+  df  _tr_x = df_tr.drop("label", axis = 1, inplace = False)
+  df_tr_y = pd.DataFrame(data={"label" : df_tr["label"]})
+
+  sess = tf.Session()
+
+  x_data = df_tr_x
+  y_data = pd.DataFrame(sess.run(tf.one_hot(df_tr["label"], 10)))
+
+  nx_data = MinMaxScaler().fit_transform(x_data.values)
+
+  x_tr_data = nx_data[:29400]
+  x_test_data = nx_data[29400:]
+
+  y_tr_data = y_data[:29400]
+  y_test_data = y_data[29400:]
+
+  test_df = pd.read_csv("./data/digit/test.csv",sep=",")
+  ```
+  ```python
+  tf.reset_default_graph()
+
+  class CnnModel:
+
+    def __init__(self, sess, name):
+        self.sess = sess
+        self.name = name
+        self._build_net()
+
+    def _build_net(self):
+        with tf.variable_scope(self.name):
+            # dropout (keep_prob) rate  0.7~0.5 on training, but should be 1
+            # for testing
+            self.training = tf.placeholder(tf.bool)
+
+            # input place holders
+            self.X = tf.placeholder(tf.float32, [None, 784])
+
+            # img 28x28x1 (black/white), Input Layer
+            X_img = tf.reshape(self.X, [-1, 28, 28, 1])
+            self.Y = tf.placeholder(tf.float32, [None, 10])
+
+            # Convolutional Layer #1
+            conv1 = tf.layers.conv2d(inputs=X_img, filters=32, kernel_size=[3, 3], padding="SAME", activation=tf.nn.relu)
+            # Pooling Layer #1
+            pool1 = tf.layers.max_pooling2d(inputs=conv1, pool_size=[2, 2], padding="SAME", strides=2)
+            dropout1 = tf.layers.dropout(inputs=pool1, rate=0.3, training=self.training)
+
+            # Convolutional Layer #2 and Pooling Layer #2
+            conv2 = tf.layers.conv2d(inputs=dropout1, filters=64, kernel_size=[3, 3], padding="SAME", activation=tf.nn.relu)
+            pool2 = tf.layers.max_pooling2d(inputs=conv2, pool_size=[2, 2], padding="SAME", strides=2)
+            dropout2 = tf.layers.dropout(inputs=pool2, rate=0.3, training=self.training)
+
+            # Convolutional Layer #3 and Pooling Layer #3
+            conv3 = tf.layers.conv2d(inputs=dropout2, filters=128, kernel_size=[3, 3], padding="SAME", activation=tf.nn.relu)
+            pool3 = tf.layers.max_pooling2d(inputs=conv3, pool_size=[2, 2], padding="SAME", strides=2)
+            dropout3 = tf.layers.dropout(inputs=pool3, rate=0.3, training=self.training)
+
+            # Dense Layer with Relu
+            flat = tf.reshape(dropout3, [-1, 128 * 4 * 4])
+            dense4 = tf.layers.dense(inputs=flat, units=625, activation=tf.nn.relu)
+            dropout4 = tf.layers.dropout(inputs=dense4, rate=0.5, training=self.training)
+
+            # Logits (no activation) Layer: L5 Final FC 625 inputs -> 10 outputs
+            self.logits = tf.layers.dense(inputs=dropout4, units=10)
+
+        # define cost/loss & optimizer
+        self.cost = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(logits=self.logits, labels=self.Y))
+        self.optimizer = tf.train.AdamOptimizer(learning_rate=0.001).minimize(self.cost)
+
+        correct_prediction = tf.equal(tf.argmax(self.logits, 1), tf.argmax(self.Y, 1))
+        self.accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
+
+    def predict(self, x_test, training=False):
+        return self.sess.run(self.logits, feed_dict={self.X: x_test, self.training: training})
+
+    def get_accuracy(self, x_test, y_test, training=False):
+        return self.sess.run(self.accuracy, feed_dict={self.X: x_test, self.Y: y_test, self.training: training})
+
+    def train(self, x_data, y_data, training=True):
+        return self.sess.run([self.cost, self.optimizer], feed_dict={self.X: x_data, self.Y: y_data, self.training: training})
+
+    
+  # initialize
+  sess = tf.Session()
+
+  #모델을 담아낼 리스트를 만들고 몇 개의 모델을 할지 정한다.
+  models = []
+  num_of_models = 5
+  cnn_models = [CnnModel(sess, "Model" + str(x)) for x in range(num_of_models)]
+
+  sess.run(tf.global_variables_initializer())
+
+  print('Learning Started!')
+
+  training_epochs = 5
+  batch_size = 128
+
+  # train my model
+  # 에폭마다 필요한 배치 사이즈(x, y)를 불러와서 학습을 시킨다.
+  print("***** leaning start ******")
+  l_s_time = datetime.datetime.now()
+  for epoch in range(training_epochs):
+    
+    avg_cost_list = np.zeros(len(cnn_models))
+    num_of_iter = int(math.ceil(len(x_tr_data) / batch_size))
+    start_time = datetime.datetime.now()
+    for i in range(num_of_iter):
+        print("epoch : {}, time : {},  {} %".format(epoch, datetime.datetime.now(), (i / num_of_iter)*100))
+        batch_x = x_tr_data[i * batch_size : batch_size * (i + 1)]
+        batch_y = y_tr_data[i * batch_size : batch_size * (i + 1)]
+        # train each model. 기존에는 모델 하나만 학습시켰던 반면 앙상블 에서는 각각의 모델에 대해 학습을 시킨다.
+        for x_idx, x in enumerate(cnn_models):
+            c, _ = x.train(batch_x, batch_y)
+            avg_cost_list[x_idx] += c / num_of_iter # 각각의 모델별로 cost를 구해준다.
+            print("c : {}".format(c))
+    end_time = datetime.datetime.now()
+    print("time : {}, epoch: {}, cost : {}".format(datetime.datetime.now(), epoch, avg_cost_list))
+    print("{} epoch 소요 시간 : {}, 현재까지 소요시간 : {}".format(epoch, end_time - start_time, end_time - l_s_time))
+  print("****** learning end ******")
+  l_e_time = datetime.datetime.now()
+  print("##### 최종 소요 시간 : {} #####".format(l_e_time - l_s_time))
+  # Test model and check accuracy
+  test_size = len(x_test_data)
+  predictions = np.zeros([test_size, 10])
+  for x_idx, x in enumerate(cnn_models):
+    print(x_idx, 'Accuracy:', x.get_accuracy(x_test_data, y_test_data))
+    p = x.predict(x_test_data) # 각각의 모델에 대해서 예측
+    predictions += p # 예측 한 것들의 합을 구한다.
+
+  ensemble_correct_prediction = tf.equal(tf.argmax(predictions, 1), tf.argmax(y_test_data, 1)) 
+  # predict_correct = tf.equal(tf.argmax(H, 1), tf.argmax(Y, 1))
+
+  ensemble_accuracy = tf.reduce_mean(tf.cast(ensemble_correct_prediction, tf.float32))
+  # accuracy = tf.reduce_mean(tf.cast(predict_correct, dtype = tf.float32))
+
+  print('Ensemble accuracy:', sess.run(ensemble_accuracy))
+
+  # print("정확도 : {}".format(sess.run(accuracy, feed_dict = {X : x_test_data, Y : y_test_data, drop_rate : 1.0}))
+  ```
+  
+  
 
   
