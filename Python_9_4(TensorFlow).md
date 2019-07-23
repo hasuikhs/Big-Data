@@ -4,6 +4,7 @@
 
 ```python
 # convolution example
+# cnn 은 이미지 파일을 여러개로 분할하여 부분부분을 뽑아 정해진 칸수 만큼 움직이면서 패턴을 
 import tensorflow as tf
 import numpy as np
 
