@@ -1,1 +1,48 @@
+TensorFlow for Java(Web Application)
 
+1. CNN을 이용한 Deep Learning을 python으로 구현
+    => 모델을 생성하고 학습을 진행하는 부분까지 구현
+    => 이렇게 학습한 내용을 file로 저장
+    => 파일에 저장되는 내용은 TensorFlow 그래프와 Variable 데이터
+
+2. Web Application 작성(Java Servlet)
+    => WAS : Tomcat 7.0
+    
+    이클립스 -> window -> preference -> java -> edit -> default VM arguments
+    -Djava.library.path=C:\python_ML\DLL
+
+    기본적인 설정 후에 round trip 방식의 web application을 작성
+
+    1. Dynamic Web Application을 작성
+       Context Root : Web 상에서 프로젝트를 지칭하기 위한 논리적인 이름 => cnn
+       URL Mappings : Web 상에서 java program(servlet)를 지칭하기 위한 논리적인 이름
+		      => /sample
+       GET방식으로 호출
+       => browser의 주소창에 서버쪽 호출 URL을 입력해서 서버쪽 프로그램을 호출
+          HTTP://localhost:9090/cnn/sample
+       => Servlet의 doGet method가 호출
+          -> 입력받고, 로직처리, 출력처리
+       => Tomcat에 의해서 우리 프로젝트가 서비스되어야함 -> deploy!!
+       => Round Trip방식의 Web Application 실행
+	  => 화면이 refresh 됨
+	  예전에는 별로 문제가 안되어 한창 JSP로 프로그램을 작성
+          => Web browser는 서버가 보내준 내용을 rendering하는 역할
+	     모든 데이터가 서버쪽에서 생성되서 네트워크를 통해 데이터가 클라이언트에게 전송
+	  => mobile 시대가 도래하면서
+	     데이터 사용량을 최소화 할 필요가 생기게 됨
+          => 서버쪽 프로그램과 프론트앤드 프로그램을 따로 작성
+             HTML5로 프론트엔드 프로그램을 작성(react.js, view.js, angular)
+ 	  => AJAX 방식으로 프로그램을 작성
+ 	  => AJAX(XML을 사용해 서버와의 통신을 가능하게 해주는 JavaScript 통신 기능)
+ 	  => 순수 JavaScript AJAX는 구현이 복잡하고 유지보수가 쉽지 않음 => jQuery
+
+==============================================================================
+
+클라이언트 프로그램(HTML, CSS, JavaScript => HTML5)을 작성(jQuery를 기반으로 작성)
+=> 예측하고 싶은 이미지를 선택해서 이 이미지의 픽셀 정보를 추출해서 
+   이 데이터를 서버에 전송
+   이 전송되는 픽셀 데이터는 [1, 784] 형태의 데이터
+
+서버쪽 프로그램을 작성
+=> 클라이언트가 보내준 [1, 784] 형태의 픽셀데이터를 받아서 
+   CNN 딥러닝 모델을 이용해서 Prediction 작업 후 결과 데이터를 클라이언트에게 전송
