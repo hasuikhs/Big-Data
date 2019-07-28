@@ -52,7 +52,7 @@
                         padding = "SAME", strides = 1, activation = tf.nn.relu)
   L1 = tf.layers.max_pooling2d(inputs = L1, pool_size = [2, 2], padding = "SAME", strides = 2)
   
-  print("L1 shaep : {}".format(L1.shape))
+  print("L1 shape : {}".format(L1.shape))
   # L1 shaep : (?, 14, 14, 32)
   
   ## Convolution Layer 2
@@ -111,7 +111,9 @@
               print("step :{}, {} of {}, 시간 : {}, cost_val : {} ".format(step, i,                                          num_of_iter,datetime.datetime.now(), cost_val))
   # 모델 저장 코드
   saver = tf.train.Saver()
+ 
   # 저장 위치 : C:/Pyhon_ML/model/output_model.ckpt
+  # 모델 저장 폴더를 미리 만들어 두지 않으면 애러 
   save_path = saver.save(sess, "./model/output_model.ckpt")
   
   # Accuracy 측정
