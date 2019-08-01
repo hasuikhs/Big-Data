@@ -152,21 +152,32 @@
      import numpy as np
      import pandas as pd
      
+     ## mysql 설치 및 기동 과정
      ## mysql을 다운로드 받아서 간단하게 설치-설정
      ## 1. 다운로드 받은 mysql.zip 파일을 압축 해제 후
+     
      ## 2. mysql bin 폴더에서 shift + 우클릭 => 여기서 명령창 실행 (command 창의 working directory)
+     
      ## 3. 일단 DBMS 기동 => mysqld => 실행 성공후 창을 minimize
+     
      ## 4. mysql 서버가 실행되고 있는 상태이기 때문에 다른 command창을 이용해서 mysql console로 진입
+     
      ## 5. 새로운 command창 실행 후 mysql -u root
+     
      ## 6. mysql console에 진입하면 mysql로 프롬프트가 변경
+     
      ## 7. 새로운 사용자를 생성
      ##   mysql> create user python identified by "python"; 
      ##   mysql> create user python@localhost identified by "python";
+     ##   외부연결에 대비해 로컬호스트 계정 생성
+     
      ## 8. database를 생성
      ##   mysql> create database library;
+     
      ## 9. 새로운 사용자에게 database사용 권한을 부여
      ##   mysql> grant all privileges on library.* to python;
      ##   mysql> grant all privileges on library.* to python@localhost;
+     
      ## 10. console에서 command 창으로 빠져 나감
      ##   mysql> exit
      ## 11. command 창에서 제공된 script file을 이용해서 database 구축
