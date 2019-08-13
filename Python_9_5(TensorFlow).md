@@ -113,7 +113,8 @@
   saver = tf.train.Saver()
  
   # 저장 위치 : C:/Pyhon_ML/model/output_model.ckpt
-  # 모델 저장 폴더를 미리 만들어 두지 않으면 애러 
+  # 모델 저장 폴더를 미리 만들어 두지 않으면 애러
+  # 모바일로 사용하기 위해서 tflite 파일로 변환할 필요 있음
   save_path = saver.save(sess, "./model/output_model.ckpt")
   
   # Accuracy 측정
