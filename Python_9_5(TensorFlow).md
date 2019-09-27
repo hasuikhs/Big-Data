@@ -83,7 +83,7 @@
   hypothesis = tf.identity(H, "hypothesis")
   
   # cost function
-  cost = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits_v2(logits = logits,                                                                            labels = Y))
+  cost = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits_v2(logits = logits, labels = Y))
   
   ## train
   optimizer = tf.train.AdamOptimizer(learning_rate = 0.001)
@@ -108,7 +108,8 @@
           _, cost_val, W_val, b_val = sess.run([train, cost, W2, b2], 
                               feed_dict = {X : batch_x, Y : batch_y, drop_rate : 0.7})
           if i % 23 ==0:
-              print("step :{}, {} of {}, 시간 : {}, cost_val : {} ".format(step, i,                                          num_of_iter,datetime.datetime.now(), cost_val))
+              print("step :{}, {} of {}, 시간 : {}, cost_val : {} ".format(step, i,
+                                                                          num_of_iter,datetime.datetime.now(), cost_val))
   # 모델 저장 코드
   saver = tf.train.Saver()
  
