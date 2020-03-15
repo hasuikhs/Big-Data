@@ -457,8 +457,17 @@ display(df)
 
 - 넣으려는 Row의 컬럼과 기존의 DataFrame의 컬럼이 같아야 한다.
 
+- 기존의 index를 쓰면 선택, 없는 index를 쓰면 추가
+
   ```python
   df.loc["five",:] = ["물리", "유관순", 2, 3.5]
   ```
 
   ![image-20200308214740648](06_01_Pandas.assets/image-20200308214740648.png)
+
+#### 3.3.8 Row 삭제하기
+
+```python
+df.drop(["one", "three"], axis=0, inplace=True)
+```
+
