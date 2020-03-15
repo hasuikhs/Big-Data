@@ -26,7 +26,7 @@
 - Anaconda에서 설치
 
   ```bash
-  $ anaconda install pandas
+  $ conda install pandas
   ```
 
 - Python에서 설치
@@ -312,7 +312,7 @@ display(df)
 #### 3.3.1 describe() : 기본 통계
 
 ```python
-display(df.descrbe())
+display(df.describe())
 ```
 
 ![image-20200308204738770](06_01_Pandas.assets/image-20200308204738770.png)
