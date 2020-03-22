@@ -10,7 +10,7 @@ data = [[2, np.nan],
         [7, -3],
         [np.nan, np.nan],
         [1, -2]]
-df = pd.DataFrame(data,
+df = pd.DataFrame(data,	
                   columns = ["one", "two"],
                   index = ["a", "b", "c", "d"])
 display(df)
@@ -191,7 +191,7 @@ display(df)
 - Boolean Mask를 만들기 위한 함수
 
   ```python
-  df["E"].inin(["AA"])
+  df["E"].isin(["AA"])
   ```
 
   ```python

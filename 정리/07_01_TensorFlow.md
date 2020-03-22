@@ -176,7 +176,7 @@ b = tf.Variable(tf.random_normal([1]), name="bias")
 
 - Hypothesis(가설)
   - 최종 목적은 Training Data에 가장 근접한 Hypothesis를 만드는 것(W와 b를 결정)
-  - 잘 만들어진 가서른 W가 1에 b가 0에 가까워야 함
+  - 잘 만들어진 가설은 W가 1에 b가 0에 가까워야 함
 
 ### 4.3 Cost(loss) Function
 
