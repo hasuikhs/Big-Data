@@ -1,29 +1,5 @@
 # 07_01_TensorFlow
 
-## 0. Machine Learning
-
-- 프로그램 자체가 **데이터를 기반으로 학습**을 통해 배우는 능력을 가지는 프로그래밍
-
-### 0.1 Learning의 종류
-
-#### 0.1.1 Supervised Learning(지도 학습)
-
-- Training Set이라고 불리는 Label화 된 데이터를 통해 학습
-
-![image-20200321201243690](07_01_TensorFlow.assets/image-20200321201243690.png)
-
-- Linear Regression(선형 회귀) - 공부 시간 : 시험 점수
-- Logistic Regression(로지스틱 회귀)
-  - Binary Classification(이항 분류) - 공부 시간 : 합격/불합격
-  - Multinomial Classification(다향 분류) - 공부 시간 : 학점
-
-#### 0.1.2 Unsupervised Learning(비지도 학습)
-
-- Label화 되지 않은 데이터를 통해 학습
-- 데이터를 이용해 스스로 학습
-
-![image-20200321201904781](07_01_TensorFlow.assets/image-20200321201904781.png)
-
 ## 1. TensorFlow ?
 
 - Google이 만든 Machine Learning Library
@@ -151,10 +127,161 @@ print(sess.run(node1))	# [10 20 30]
 print(sess.run(node2))	# [10. 20. 30.]
 ```
 
+## 3. Machine Learning
 
+- 프로그램 자체가 **데이터를 기반으로 학습**을 통해 배우는 능력을 가지는 프로그래밍
 
+### 3.1 Learning의 종류
 
+#### 3.1.1 Supervised Learning(지도 학습)
 
+- Training Set이라고 불리는 Label화 된 데이터를 통해 학습
+
+![image-20200321201243690](07_01_TensorFlow.assets/image-20200321201243690.png)
+
+- Linear Regression(선형 회귀) - 공부 시간 : 시험 점수
+- Logistic Regression(로지스틱 회귀)
+  - Binary Classification(이항 분류) - 공부 시간 : 합격/불합격
+  - Multinomial Classification(다향 분류) - 공부 시간 : 학점
+
+#### 3.1.2 Unsupervised Learning(비지도 학습)
+
+- Label화 되지 않은 데이터를 통해 학습
+- 데이터를 이용해 스스로 학습
+
+![image-20200321201904781](07_01_TensorFlow.assets/image-20200321201904781.png)
+
+## 4. Linear Regression
+
+- Linear Regression의 가장 큰 목표는 가설의 완성
+  $$
+  가설(Hypothesis) = Wx + b
+  $$
+
+### 4.1 Training Data Set 준비
+
+```python
+import tensorflow as tf
+
+x = [1, 2, 3]
+y = [1, 2, 3]
+```
+
+### 4.2 Weight(W) & Bias(b) 준비
+
+```python
+W = tf.Variable(tf.random_normal([1]), name="weight")
+b = tf.Variable(tf.random_normal([1]), name="bias")
+```
+
+- Hypothesis(가설)
+  - 최종 목적은 Training Data에 가장 근접한 Hypothesis를 만드는 것(W와 b를 결정)
+  - 잘 만들어진 가서른 W가 1에 b가 0에 가까워야 함
+
+### 4.3 Cost(loss) Function
+
+$$
+cost(W, b) = \frac{1}{n} \sum\limits^{n}_{i=1}(H(x^i)-y^i)^2
+$$
+
+- 목적은 cost 함수를 최소로 만드는 W와 b를 구하는 것
+
+```python
+cost = tf.reduce_mean(tf.square(H - y))
+```
+
+- **Cost Function Minimize**
+
+  ```python
+  optimizer = tf.train.GradientDescentOptimizer(learning_rate=0.01)
+  train = optimizer.minimize(cost)
+  ```
+
+### 4.4 Training
+
+```python
+# runner 생성
+sess = tf.Session()
+
+# 실행전 global variable 초기화
+sess.run(tf.global_variables_initializer())
+
+# 학습 진행
+for step in range(3000):
+    _, w_val, b_val, cost_val = sess.run([train, W, b, cost])
+    if step % 300 == 0:
+        print("{}, {}, {}".format(w_val, b_val, cost_val))
+```
+
+### 4.5 결과
+
+```python
+print(sess.run(H))
+```
+
+### 4.6 소스
+
+```python
+x = [1, 2, 3]
+y = [1, 2, 3]
+
+W = tf.Variable(tf.random_normal([1]), name = "weight")
+b = tf.Variable(tf.random_normal([1]), name = "bias")
+
+H = W * x + b
+
+cost = tf.reduce_mean(tf.square(H - y))
+
+optimizer = tf.train.GradientDescentOptimizer(learning_rate = 0.01)
+train = optimizer.minimize(cost)
+
+sess = tf.Session()
+
+sess.run(tf.global_variables_initializer())
+
+for step in range(3000):
+    _, w_val, b_val, cost_val = sess.run([train, W, b, cost])
+    if step % 300 == 0:
+        print("{}, {}, {}".format(w_val, b_val, cost_val))
+        
+print(sess.run(H))
+```
+
+## 5. Prediction
+
+- Placeholder를 이용
+
+```python
+import tensorflow as tf
+
+x = tf.placeholder(dtype = tf.float32)
+y = tf.placeholder(dtype = tf.float32)
+
+x_data = [1, 2, 3, 4]
+y_data = [4, 7, 10, 13]
+
+W = tf.Variable(tf.random_normal([1]), name = "weight")
+b = tf.Variable(tf.random_normal([1]), name = "bias")
+
+H = W * x + b
+
+cost = tf.reduce_mean(tf.square(H - y))
+
+optimizer = tf.train.GradientDescentOptimizer(learning_rate = 0.01)
+train = optimizer.minimize(cost)
+
+sess = tf.Session()
+
+sess.run(tf.global_variables_initializer())
+
+for step in range(4200):
+    _, cost_val = sess.run([train, cost], feed_dict = {x : x_data, y : y_data})
+    if step % 300 == 0:
+        print(cost_val)
+        
+# 예측
+print(sess.run(H, feed_dict = {x : [300]}))
+```
 
 
 
