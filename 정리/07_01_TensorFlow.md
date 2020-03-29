@@ -18,13 +18,13 @@
 - Python에서 설치
 
   ```bash
-  $ pip install tensorflow==1.5
+  $ pip install tensorflow==2.0
   ```
 
 - Anaconda에서 설치
 
   ```bash
-  $ conda install tesnsorflow==1.5
+  $ conda install tesnsorflow==2.0
   ```
 
 #### 1.1.2 GPU 버전
@@ -45,16 +45,16 @@
    - Python에서
 
      ```bash
-     $ pip install tensorflow-gpu
+     $ pip install tensorflow-gpu==2.0
      
      # 업그레이드 시
-     $ pip install --upgrade tensorflow-gpu
+     $ pip install --upgrade tensorflow-gpu==2.0
      ```
 
    - Anaconda에서
 
      ```bash
-     $ conda install tensorflow-gpu
+     $ conda install tensorflow-gpu==2.0
      ```
 
 ## 2. TensorFlow 기초
@@ -65,10 +65,7 @@
 
   ```python
   my_node = tf.constant("Hello World")
-  sess = tf.Session()
-  
-  # Session을 이용해서 Node를 실행시켜야지 Node가 가지고 있는 데이터를 출력 함
-  print(sess.run(my_node).decode())   # 입력한 데이터 출력 .decode()
+  print(my_node.numpy().decode())   # 입력한 데이터 출력 .decode()
   ```
 
 ### 2.2 constant
@@ -81,51 +78,14 @@
   
   node3 = node1 + node2
   
-  ## 그래프를 실행시키기 위해 runner역할을 하는 session 객체 필요
-  sess = tf.Session()
-  
-  print(sess.run(node3))
-  print(sess.run([node1, node2, node3]))
+  print(node3.numpy())
+  print([node1.numpy(), node2.numpy(), node3.numpy()])
   ```
-
+  
   ```
   30.0
-  [10.0, 20.0, 30.0]
+[10.0, 20.0, 30.0]
   ```
-
-### 2.3 placeholder
-
-- 선언과 동시에 초기화하는 것이 아니라 일단 선언 후 나중에 값을 입력
-
-  ```python
-  node1 = tf.placeholder(dtype = tf.float32)
-  node2 = tf.placeholder(dtype = tf.float32)
-  
-  node3 = node1 + node2
-  
-  sess = tf.Session()
-  result = sess.run(node3, feed_dict = {node1 : 10, node2 : 20})
-  
-  print(result)
-  ```
-
-  ```
-  30.0
-  ```
-
-### 2.4 cast
-
-```python
-node1 = tf.constant([10, 20, 30], dtype = tf.int32)
-print(node1)	# Tensor("Const_4:0", shape=(3,), dtype=int32)
-
-node2 = tf.cast(node1, dtype = tf.float32)
-print(node2)	# Tensor("Cast_4:0", shape=(3,), dtype=float32)
-
-sess = tf.Session()
-print(sess.run(node1))	# [10 20 30]
-print(sess.run(node2))	# [10. 20. 30.]
-```
 
 ## 3. Machine Learning
 
@@ -162,16 +122,19 @@ print(sess.run(node2))	# [10. 20. 30.]
 
 ```python
 import tensorflow as tf
+import numpy as np
+import matplotlib.pyplot as plt
+import random
 
 x = [1, 2, 3]
-y = [1, 2, 3]
+y = [2, 4, 6]
 ```
 
 ### 4.2 Weight(W) & Bias(b) 준비
 
 ```python
-W = tf.Variable(tf.random_normal([1]), name="weight")
-b = tf.Variable(tf.random_normal([1]), name="bias")
+W = tf.Variable(random.random(), name="weight")
+b = tf.Variable(random.random(), name="bias")
 ```
 
 - Hypothesis(가설)
@@ -184,103 +147,86 @@ $$
 cost(W, b) = \frac{1}{n} \sum\limits^{n}_{i=1}(H(x^i)-y^i)^2
 $$
 
-- 목적은 cost 함수를 최소로 만드는 W와 b를 구하는 것
+- cost 함수 선언
 
-```python
-cost = tf.reduce_mean(tf.square(H - y))
-```
+  ```python
+  def compute_cost():
+      H = W * x + b
+      cost = tf.reduce_mean(tf.square(H - y))
+      return cost
+  ```
 
 - **Cost Function Minimize**
 
   ```python
-  optimizer = tf.train.GradientDescentOptimizer(learning_rate=0.01)
-  train = optimizer.minimize(cost)
+  optimizer = tf.optimizers.Adam(learning_rate = 0.01)
   ```
 
 ### 4.4 Training
 
 ```python
-# runner 생성
-sess = tf.Session()
-
-# 실행전 global variable 초기화
-sess.run(tf.global_variables_initializer())
-
 # 학습 진행
 for step in range(3000):
-    _, w_val, b_val, cost_val = sess.run([train, W, b, cost])
+    optimizer.minimize(compute_cost, var_list=[W, b])
     if step % 300 == 0:
-        print("{}, {}, {}".format(w_val, b_val, cost_val))
+        print("{}, {}, {}".format(W.numpy(), b.numpy(), compute_cost().numpy()))
 ```
 
-### 4.5 결과
+### 4.5 Prediction
 
 ```python
-print(sess.run(H))
+feed_x = 8
+predict_y = W * feed_x + b
+
+print(predict_y.numpy())
 ```
 
-### 4.6 소스
+### 4.5 그래프
+
+- 그래프 범위
+
+  ```python
+  line_x = np.arrange(min(x), max(x), 0.01)
+  line_y = W * line_x + b
+  ```
+
+- 그래프 그리기
+
+  ```python
+  plt.plot(line_x, line_y, 'r-')
+  plt.plot(x, y, 'bo')
+  plt.show()
+  ```
+
+  ![image-20200329213659494](C:\Users\STU\AppData\Roaming\Typora\typora-user-images\image-20200329213659494.png)
+
+### 4.5 소스
 
 ```python
 x = [1, 2, 3]
-y = [1, 2, 3]
+y = [2, 4, 6]
 
-W = tf.Variable(tf.random_normal([1]), name = "weight")
-b = tf.Variable(tf.random_normal([1]), name = "bias")
+W = tf.Variable(random.random(), name="weight")
+b = tf.Variable(random.random(), name="bias")
 
-H = W * x + b
+def compute_cost():
+    H = W * x + b
+    cost = tf.reduce_mean(tf.square(H - y))
+    return cost
 
-cost = tf.reduce_mean(tf.square(H - y))
-
-optimizer = tf.train.GradientDescentOptimizer(learning_rate = 0.01)
-train = optimizer.minimize(cost)
-
-sess = tf.Session()
-
-sess.run(tf.global_variables_initializer())
+optimizer = tf.optimizers.Adam(learning_rate = 0.01)
 
 for step in range(3000):
-    _, w_val, b_val, cost_val = sess.run([train, W, b, cost])
+    optimizer.minimize(compute_cost, var_list=[W, b])
     if step % 300 == 0:
-        print("{}, {}, {}".format(w_val, b_val, cost_val))
+        print("{}, {}, {}".format(W.numpy(), b.numpy(), compute_cost().numpy()))
         
-print(sess.run(H))
-```
+line_x = np.arrange(min(x), max(x), 0.01)
+line_y = W * line_x + b
 
-## 5. Prediction
-
-- Placeholder를 이용
-
-```python
-import tensorflow as tf
-
-x = tf.placeholder(dtype = tf.float32)
-y = tf.placeholder(dtype = tf.float32)
-
-x_data = [1, 2, 3, 4]
-y_data = [4, 7, 10, 13]
-
-W = tf.Variable(tf.random_normal([1]), name = "weight")
-b = tf.Variable(tf.random_normal([1]), name = "bias")
-
-H = W * x + b
-
-cost = tf.reduce_mean(tf.square(H - y))
-
-optimizer = tf.train.GradientDescentOptimizer(learning_rate = 0.01)
-train = optimizer.minimize(cost)
-
-sess = tf.Session()
-
-sess.run(tf.global_variables_initializer())
-
-for step in range(4200):
-    _, cost_val = sess.run([train, cost], feed_dict = {x : x_data, y : y_data})
-    if step % 300 == 0:
-        print(cost_val)
-        
-# 예측
-print(sess.run(H, feed_dict = {x : [300]}))
+plt.plot(line_x, line_y, 'r-')
+plt.plot(x, y, 'bo')
+plt.show()
 ```
 
 
