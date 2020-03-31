@@ -97,7 +97,7 @@
 
 - Training Set이라고 불리는 Label화 된 데이터를 통해 학습
 
-![image-20200321201243690](07_01_TensorFlow.assets/image-20200321201243690.png)
+<img src="07_01_TensorFlow.assets/image-20200321201243690.png" style="zoom:80%">
 
 - Linear Regression(선형 회귀) - 공부 시간 : 시험 점수
 - Logistic Regression(로지스틱 회귀)
@@ -109,7 +109,7 @@
 - Label화 되지 않은 데이터를 통해 학습
 - 데이터를 이용해 스스로 학습
 
-![image-20200321201904781](07_01_TensorFlow.assets/image-20200321201904781.png)
+<img src="07_01_TensorFlow.assets/image-20200321201904781.png" style="zoom:80%">
 
 ## 4. Linear Regression
 
