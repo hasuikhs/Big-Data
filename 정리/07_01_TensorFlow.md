@@ -198,7 +198,7 @@ print(predict_y.numpy())
   plt.show()
   ```
 
-  ![image-20200329213659494](C:\Users\STU\AppData\Roaming\Typora\typora-user-images\image-20200329213659494.png)
+  ![image-20200329213659494](07_01_TensorFlow.assets/image-20200329213659494.png)
 
 ### 4.5 소스
 
@@ -229,6 +229,77 @@ plt.plot(x, y, 'bo')
 plt.show()
 ```
 
+## 5. 다항 회귀
 
+### 5.1 2차
 
+```python
+x = [0.3, -0.78, 1.26, 0.03, 1.11, 0.24, -0.24, -0.47, -0.77, -0.37, -0.85, -0.41, -0.27, 0.02, -0.76, 2.66]
+y = [12.27, 14.44, 11.87, 18.75, 17.52, 16.37, 19.78, 19.51, 12.65, 14.74, 10.72, 21.94, 12.83, 15.51, 17.14, 14.42]
 
+W = tf.Variable(random.random(), name="weight")
+b = tf.Variable(random.random(), name="bias")
+c = tf.Variable(random.random(), name="c")
+
+def compute_cost():
+    H = W * x*x + b * x + c
+    cost = tf.reduce_mean(tf.square(H - y))
+    return cost
+
+optimizer = tf.optimizers.Adam(learning_rate = 0.01)
+
+for step in range(3000):
+    optimizer.minimize(compute_cost, var_list=[W, b, c])
+    if step % 300 == 0:
+        print("{}, {}, {}, {}".format(W.numpy(), b.numpy(), c.numpy(), compute_cost().numpy()))
+        
+line_x = np.arange(min(x), max(x), 0.01)
+line_y = W * line_x**2 + b * line_x + c
+
+plt.plot(line_x, line_y, 'r-')
+plt.plot(x, y, 'bo')
+plt.show()
+```
+
+![image-20200401214904001](07_01_TensorFlow.assets/image-20200401214904001.png)
+
+## 6. 딥러닝을 활용한 회귀
+
+```python
+x = [0.3, -0.78, 1.26, 0.03, 1.11, 0.24, -0.24, -0.47, -0.77, -0.37, -0.85, -0.41, -0.27, 0.02, -0.76, 2.66]
+y = [12.27, 14.44, 11.87, 18.75, 17.52, 16.37, 19.78, 19.51, 12.65, 14.74, 10.72, 21.94, 12.83, 15.51, 17.14, 14.42]
+
+model = tf.keras.Sequential([
+   tf.keras.layers.Dense(units=6, activation='tanh', input_shape=(1,)),
+    tf.keras.layers.Dense(units=1)
+])
+
+model.compile(optimizer=tf.keras.optimizers.SGD(learning_rate=0.1), loss='mse')
+
+model.summary()
+```
+
+- 위의 딥러닝 모델은 2개의 Dense 레이어로 구성
+
+  - 첫번째 레이어는 활성화 함수로 'tanh'를 사용함으로써 실수를 입력 받아 -1~1 사이의 값을 반환
+  - 또한 6개의 뉴런을 할당, 너무 많이 할당 되면 **Overfitting** 문제 발생 가능
+
+  - 두번째 레이어는 x에 입력값에 대한 하나의 y값만 출력되어야 하기 때문에 뉴런 수가 1개
+
+- optimizer의 손실은 MSE(Mean Squared Error)로, 잔차의 제곱의 평균을 구함
+  - 때문에 손실을 줄이는 쪽으로 학습
+
+```python
+model.fit(x, y, epochs=10)	// 학습
+model.predict(x)			// 예측
+
+plt.plot(line_x, line_y, 'r-')
+plt.plot(x, y, 'bo')
+plt.show()
+```
+
+![image-20200401221224458](07_01_TensorFlow.assets/image-20200401221224458.png)
+
+- 과적합 예시 (1000번 학습시)
+
+  ![image-20200401221310016](07_01_TensorFlow.assets/image-20200401221310016.png)
