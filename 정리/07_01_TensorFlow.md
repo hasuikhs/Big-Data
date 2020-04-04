@@ -303,3 +303,182 @@ plt.show()
 - 과적합 예시 (1000번 학습시)
 
   ![image-20200401221310016](07_01_TensorFlow.assets/image-20200401221310016.png)
+
+
+
+## 7. 더하기
+
+### 7.1 데이터 셋 준비
+
+- 데이터 셋 다운로드
+
+  ```python
+  from tensorflow.keras.datasets import boston_housing
+  (train_X, train_Y), (test_X, test_Y) = boston_housing.load_data()
+  ```
+
+- 데이터 셋 확인
+
+  ```python
+  print(len(train_X), len(test_X))
+  print(train_X[0])
+  print(train_Y[0])
+  ```
+
+  ```
+  404 102		// 훈련데이터, 테스트 데이터
+  [  1.23247   0.        8.14      0.        0.538     6.142    91.7
+     3.9769    4.      307.       21.      396.9      18.72   ]
+  15.2
+  ```
+
+### 7.2 정규화 & 표준화
+
+- 정규화
+  - 데이터를 0~1 사이의 값으로 변환
+
+$$
+x = \frac {x - x_{min}}{x_{max} - x_{min}}
+$$
+
+- 표준화
+
+  - 0이 평균인 표준정구분포화 시킴
+  - 평균을 기준으로 어느 정도 떨어져 있는지를 나타낼 때 사용
+
+  $$
+  x = \frac {x - \mu}{\sigma}
+  $$
+
+  
+  - 딥러닝에서는 데이터를 전처리해서 정규화해야 학습 효율이 좋음
+
+```python
+x_mean = train_X.mean()
+x_std = train_X.std()
+
+# 표준화
+train_X -= x_mean
+train_X /= x_std
+
+test_X -= x_mean
+test_X /= x_std
+
+y_mean = train_Y.mean()
+y_std = train_Y.std()
+train_Y -= y_mean
+train_Y /= y_std
+test_Y -= y_mean
+test_Y /= y_std
+
+# 정규화 확인
+print(train_X[0])
+print(train_Y[0])
+```
+
+```
+[-0.47482083 -0.48335641 -0.42698208 -0.48335641 -0.47963044 -0.44081941
+  0.15172056 -0.45581402 -0.45565404  1.64280094 -0.33791894  2.26541184
+ -0.35370929]
+-0.7821526033779157
+```
+
+### 7.3 모델 생성
+
+```python
+import tensorflow as tf
+model = tf.keras.Sequential([
+    tf.keras.layers.Dense(units=52, activation='relu', input_shape=(13,)),
+    tf.keras.layers.Dense(units=39, activation='relu'),
+    tf.keras.layers.Dense(units=26, activation='relu'),
+    tf.keras.layers.Dense(units=1)
+])
+model.compile(optimizer=tf.keras.optimizers.Adam(lr=0.07), loss='mse')
+model.summary()
+```
+
+```
+Model: "sequential"
+_________________________________________________________________
+Layer (type)                 Output Shape              Param #   
+=================================================================
+dense (Dense)                (None, 52)                728       
+_________________________________________________________________
+dense_1 (Dense)              (None, 39)                2067      
+_________________________________________________________________
+dense_2 (Dense)              (None, 26)                1040      
+_________________________________________________________________
+dense_3 (Dense)              (None, 1)                 27        
+=================================================================
+Total params: 3,862
+Trainable params: 3,862
+Non-trainable params: 0
+_________________________________________________________________
+```
+
+### 7.4 학습
+
+```python
+history = model.fit(train_X, train_Y, epochs=25, batch_size=32, validation_split=0.25)
+```
+
+- `validation_split` : 훈련 데이터 검증률
+
+- 시각화
+
+  ```python
+  import matplotlib.pyplot as plt
+  plt.plot(history.history['loss'], 'b-', label='loss')
+  plt.plot(history.history['val_loss'], 'r--', label='val_loss')
+  plt.xlabel('epoch')
+  plt.legend()
+  plt.show()
+  ```
+
+  ![image-20200404231149473](07_01_TensorFlow.assets/image-20200404231149473.png)
+
+### 7.5 비교
+
+- 실제 값과 예측 값을 비교 시각화
+
+  ```python
+  pred_Y = model.predict(test_X)
+  
+  plt.figure(figsize=(5, 5))
+  plt.plot(test_Y, pred_Y, 'b.')
+  plt.axis([min(test_Y), max(test_Y), min(test_Y), max(test_Y)])
+  
+  plt.plot([min(test_Y), max(test_Y)], [min(test_Y), max(test_Y)], ls="--", c=".3")
+  plt.xlabel('test_Y')
+  plt.ylabel('pred_Y')
+  
+  plt.show()
+  ```
+
+  ![image-20200404232222108](07_01_TensorFlow.assets/image-20200404232222108.png)
+
+- 이상적이라면 대각선 위에 모든 점이 위치해야 함
+
+### 7.6 모델 및 학습 수정
+
+```python
+model = tf.keras.Sequential([
+    tf.keras.layers.Dense(units=52, activation='relu', input_shape=(13,)),
+    tf.keras.layers.Dense(units=39, activation='relu'),
+    tf.keras.layers.Dense(units=26, activation='relu'),
+    tf.keras.layers.Dense(units=1)
+])
+model.compile(optimizer=tf.keras.optimizers.Adam(lr=0.07), loss='mse')
+
+history = model.fit(train_X, train_Y, epochs=25, batch_size=32, validation_split=0.25, callbacks=[tf.keras.callbacks.EarlyStopping(patience=3, monitor='val_loss')])
+```
+
+- 콜백함수 추가하여 학습 도중 epoch가 끝날 때마다 호출
+  - 위에서는 val_loss가 3회의 epoch를 수행하는 동안 최고 기록으 갱신하지 못한다면 학습을 중단
+
+- 7.5의 코드르 복사하여 다시 실행하면
+
+  ![image-20200404233302050](07_01_TensorFlow.assets/image-20200404233302050.png)
+
+  - 조금 더 다양한 값을 예측하는 것으로 볼 수 있다.
+  - EarlyStopping을 이용하면 과적합되지 않도록 도중에 학습 중단 가능
