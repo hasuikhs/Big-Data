@@ -115,6 +115,8 @@ print(wine.info())
 
 ### 1.7 학습 모델 생성 및 학습
 
+- `keras.layers.Dense` : 신경망 구조를 간단하게 구현해주는 함수
+
 ```python
 model = tf.keras.Sequential([
     tf.keras.layers.Dense(units=48, activation='relu', input_shape=(12,)),
@@ -156,9 +158,17 @@ plt.legend()
 plt.show()
 ```
 
+![image-20200412211714215](07_02_TensorFlow(분류).assets/image-20200412211714215.png)
+
 ### 1.9 평가
 
 ```python
 model.evaluate(test_X, test_Y)
 ```
+
+```
+[0.04214931259289957, 0.9907692]
+```
+
+## 2. 다항 분류
 
