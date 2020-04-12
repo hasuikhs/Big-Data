@@ -2,6 +2,8 @@
 
 ## 1. 이항 분류
 
+- 이향 분류란 범주의 수가 2개인 경우, 즉 0 or 1인 경우
+
 ### 1.1 데이터 준비
 
 - 와인의 특성을 이용해 와인을 분류한 데이터 셋
@@ -167,8 +169,181 @@ model.evaluate(test_X, test_Y)
 ```
 
 ```
-[0.04214931259289957, 0.9907692]
+[0.04214931259289957, 0.9907692]	// loss: 0.0226 - accuracy: 0.9908
 ```
 
 ## 2. 다항 분류
+
+- 다항 분류란 이름에서 보듯이 범주의 수가 2개를 초과하는 경우
+
+- 위의 와인 데이터 셋에서는 품질로 분류
+
+### 2.1 데이터 정제
+
+#### 2.1.1 확인
+
+```python
+print(wine['quality'].describe())
+print(wine['quality'].value_counts())
+```
+
+```
+count    6497.000000
+mean        5.818378
+std         0.873255
+min         3.000000
+25%         5.000000
+50%         6.000000
+75%         6.000000
+max         9.000000
+Name: quality, dtype: float64
+6    2836
+5    2138
+7    1079
+4     216
+8     193
+3      30
+9       5
+Name: quality, dtype: int64
+```
+
+#### 2.1.2 시각화
+
+```python
+import matplotlib.pyplot as plt
+plt.hist(wine['quality'], bins=7, rwidth=0.8)
+plt.show()
+```
+
+![image-20200412212618942](07_02_TensorFlow(분류).assets/image-20200412212618942.png)
+
+#### 2.1.3 데이터 분류
+
+- 히스토그램을 살펴보면 범주의 수가 많은 데다 숫자의 차이가 심하기 때문에 임의로 3개의 범주로 나눔
+- 범주는 3~5는 나쁨, 7~9는 좋음, 6은 보통으로 분류
+
+```python
+wine.loc[wine['quality'] <= 5, 'new_quality'] = 0
+wine.loc[wine['quality'] == 6, 'new_quality'] = 1
+wine.loc[wine['quality'] >= 7, 'new_quality'] = 2
+
+print(wine['new_quality'].describe())
+print(wine['new_quality'].value_counts())
+```
+
+- 다시 상기시키자면 loc는 특정한 데이터의 인덱스를 고를 수 있음
+
+```
+count    6497.000000
+mean        0.829614
+std         0.731124
+min         0.000000
+25%         0.000000
+50%         1.000000
+75%         1.000000
+max         2.000000
+Name: new_quality, dtype: float64
+1.0    2836
+0.0    2384
+2.0    1277
+Name: new_quality, dtype: int64
+```
+
+#### 2.1.4 데이터 정규화
+
+```python
+del wine['quality']
+wine_norm = (wine - wine.min()) / (wine.max() - wine.min())
+wine_shuffle = wine_norm.sample(frac=1)
+wine_np = wine_shuffle.to_numpy()
+
+train_idx = int(len(wine_np) * 0.8)
+train_X, train_Y = wine_np[:train_idx, :-1], wine_np[:train_idx, -1]
+test_X, test_Y = wine_np[train_idx:, :-1], wine_np[train_idx:, -1]
+train_Y = tf.keras.utils.to_categorical(train_Y, num_classes=3)
+test_Y = tf.keras.utils.to_categorical(test_Y, num_classes=3)
+```
+
+### 2.2 학습 모델 생성 및 학습
+
+#### 2.2.1 데이터 확인
+
+```python
+print(wine.info())
+```
+
+```
+Data columns (total 13 columns):
+ #   Column                Non-Null Count  Dtype  
+---  ------                --------------  -----  
+ 0   fixed acidity         6497 non-null   float64
+ 1   volatile acidity      6497 non-null   float64
+ 2   citric acid           6497 non-null   float64
+ 3   residual sugar        6497 non-null   float64
+ 4   chlorides             6497 non-null   float64
+ 5   free sulfur dioxide   6497 non-null   float64
+ 6   total sulfur dioxide  6497 non-null   float64
+ 7   density               6497 non-null   float64
+ 8   pH                    6497 non-null   float64
+ 9   sulphates             6497 non-null   float64
+ 10  alcohol               6497 non-null   float64
+ 11  type                  6497 non-null   int64  
+ 12  new_quality           6497 non-null   float64
+dtypes: float64(12), int64(1)
+```
+
+#### 2.2.2 학습 모델 생성
+
+```python
+model = tf.keras.Sequential([
+    tf.keras.layers.Dense(units=48, activation='relu', input_shape=(12,)),
+    tf.keras.layers.Dense(units=24, activation='relu'),
+    tf.keras.layers.Dense(units=12, activation='relu'),
+    tf.keras.layers.Dense(units=3, activation='softmax')
+])
+```
+
+#### 2.2.3 학습
+
+```python
+model.compile(optimizer=tf.keras.optimizers.Adam(lr=0.07), loss='categorical_crossentropy', metrics=['accuracy'])
+
+history = model.fit(train_X, train_Y, epochs=25, batch_size=32, validation_split=0.25)
+```
+
+### 2.3 평가
+
+#### 2.3.1 시각화
+
+```python
+import matplotlib.pyplot as plt
+plt.figure(figsize=(12, 4))
+
+plt.subplot(1, 2, 1)
+plt.plot(history.history['loss'], 'b-', label='loss')
+plt.plot(history.history['val_loss'], 'r--', label='val_loss')
+plt.xlabel('Epoch')
+plt.legend()
+
+plt.subplot(1, 2, 2)
+plt.plot(history.history['accuracy'], 'g-', label='accuracy')
+plt.plot(history.history['val_accuracy'], 'k--', label='val_accuracy')
+plt.xlabel('Epoch')
+plt.ylim(0.7, 1)
+plt.legend()	# 범례 입력
+
+plt.show()
+```
+
+![image-20200412220012273](07_02_TensorFlow(분류).assets/image-20200412220012273.png)
+
+#### 2.3.2 모델 평가
+
+```python
+model.evaluate(test_X, test_Y)
+```
+
+```
+[0.3827186397405771, 0.8130769]	// loss: 0.3697 - accuracy: 0.8131
+```
 
