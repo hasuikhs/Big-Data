@@ -347,3 +347,128 @@ model.evaluate(test_X, test_Y)
 [0.3827186397405771, 0.8130769]	// loss: 0.3697 - accuracy: 0.8131
 ```
 
+## 3. Fashion MNIST
+
+- Fashion MNIST는 손글씨가 아닌 옷과 신발, 가방의 이미지를 모아놓고 분류하는 문제로 28x28 픽셀은 같지만 MNIST보다 어려운 문제로 평가된다.
+
+- 범주
+
+  | 라벨 |    범주     |
+  | :--: | :---------: |
+  |  0   | 티셔츠/상의 |
+  |  1   |    바지     |
+  |  2   |   스웨터    |
+  |  3   |   드레스    |
+  |  4   |    코트     |
+  |  5   |    샌들     |
+  |  6   |    셔츠     |
+  |  7   |   운동화    |
+  |  8   |    가방     |
+  |  9   |    부츠     |
+
+### 3.1 데이터 준비
+
+  - Fashion MNIST 데이터는 tf.keras에 기본 탑재되어 간단하게 불러올 수 있다.
+
+    ```python
+    import tensorflow as tf
+    
+    fashion_mnist = tf.keras.datasets.fashion_mnist
+    (train_X, train_Y), (test_X, test_Y) = fashion_mnist.load_data()
+    
+    print(len(train_X), len(test_X))
+    ```
+
+    ```
+    60000 10000
+    ```
+
+### 3.2 데이터 확인
+
+  ```python
+import matplotlib.pyplot as plt
+  
+plt.imshow(train_X[0], cmap='gray')
+plt.colorbar()
+plt.show()
+  
+print(train_Y[0])
+  ```
+
+  <img src="07_02_TensorFlow(분류).assets/image-20200419203621684.png" alt="image-20200419203621684" style="zoom:67%;" />
+
+  - train 데이터의 이미지 모양과 결과값이 9로 부츠를 나타내는 것을 확인할 수 있다.
+
+### 3.3 데이터 정규화
+
+- 데이터의 이미지가 0 ~ 255까지의 값을 가지므로 255로 나누면 0 ~ 1 사이의 값으로 정규화된다.
+
+  ```python
+  train_X = train_X / 255.0
+  text_Y = test_Y / 255.0
+  ```
+
+### 3.4 모델 생성
+
+```python
+model = tf.keras.Sequential([
+    tf.keras.layers.Flatten(input_shape=(28,28)),	# flatten은 평평하게 해줌
+    tf.keras.layers.Dense(units=128, activation='relu'),
+    tf.keras.layers.Dense(units=10, activation='softmax')
+])
+
+model.compile(optimizer=tf.keras.optimizers.Adam(),
+             loss='sparse_categorical_crossentropy',
+             metrics=['accuracy'])
+
+model.summary()
+```
+
+- 1.6에서 tf.keras.utils.to_categorical 함수를 이용해 정답 행렬을 원-핫 인코딩으로 바꿨다.<br>그렇게 한다면 1x10의 행렬을 생성하게 되므로 이는 대부분의 값이 0인 행렬(희소 행렬)을 <br>사용하게 되는데 이는 시스템의 낭비로 이어질 수 있다.
+
+### 3.5 학습
+
+```python
+history = model.fit(train_X, train_Y, epochs=25, validation_split=0.25)
+```
+
+### 3.6 시각화
+
+```python
+import matplotlib.pyplot as plt
+
+plt.figure(figsize=(12, 4))
+
+plt.subplot(1, 2, 1)
+plt.plot(history.history['loss'], 'b-', label='loss')
+plt.plot(history.history['val_loss'], 'r--', label='val_loss')
+plt.xlabel('Epoch')
+plt.legend()
+
+plt.subplot(1, 2, 2)
+plt.plot(history.history['accuracy'], 'g-', label='accuracy')
+plt.plot(history.history['val_accuracy'], 'k--', label='val_accuracy')
+plt.xlabel('Epoch')
+plt.ylim(0.7, 1)
+plt.legend()
+
+plt.show()
+```
+
+<img src="07_02_TensorFlow(분류).assets/image-20200419211940053.png" alt="image-20200419211940053" style="zoom:80%;" />
+
+- 검증 데이터의 손실이 감소하다가 시간이 지날수록 서서히 증가하는 과적합 현상을 확인할 수 있다.
+- 이를 해결하기 위해서는 tf.keras.callbacks.EarlyStopping을 사용할 수 있다.
+
+### 3.7 평가
+
+```python
+model.evaluate(test_X, test_Y)
+```
+
+```
+==============================================================================================] - 1s 66us/sample - loss: 42.2120 - accuracy: 0.8702
+[84.42399490814209, 0.8702]
+```
+
+- 87%의 평가 정확도를 확인할 수 있다.
