@@ -186,7 +186,7 @@ print(predict_y.numpy())
 - 그래프 범위
 
   ```python
-  line_x = np.arrange(min(x), max(x), 0.01)
+  line_x = np.arange(min(x), max(x), 0.01)
   line_y = W * line_x + b
   ```
 
@@ -221,7 +221,7 @@ for step in range(3000):
     if step % 300 == 0:
         print("{}, {}, {}".format(W.numpy(), b.numpy(), compute_cost().numpy()))
         
-line_x = np.arrange(min(x), max(x), 0.01)
+line_x = np.arange(min(x), max(x), 0.01)
 line_y = W * line_x + b
 
 plt.plot(line_x, line_y, 'r-')
@@ -290,8 +290,8 @@ model.summary()
   - 때문에 손실을 줄이는 쪽으로 학습
 
 ```python
-model.fit(x, y, epochs=10)	// 학습
-model.predict(x)			// 예측
+model.fit(x, y, epochs=10)	# 학습
+model.predict(x)			# 예측
 
 plt.plot(line_x, line_y, 'r-')
 plt.plot(x, y, 'bo')

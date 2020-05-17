@@ -405,7 +405,7 @@ print(train_Y[0])
 
   ```python
   train_X = train_X / 255.0
-  text_Y = test_Y / 255.0
+  test_Y = test_Y / 255.0
   ```
 
 ### 3.4 모델 생성
